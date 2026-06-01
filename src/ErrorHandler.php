@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App;
 
-use BadMethodCallException;
+use RuntimeException;
 
 class ErrorHandler
 {
@@ -21,11 +21,25 @@ class ErrorHandler
      */
     public function safeReadFile(string $filePath): string
     {
-        // TODO: Verify that the file exists before attempting to read it.
-        // TODO: Verify that the file is readable.
-        // TODO: Read and return the file contents as a string.
-        // TODO: Throw a clear exception when the file is missing or unreadable.
-        throw new BadMethodCallException('Not implemented');
+        // Verify that the file exists before attempting to read it.
+        if (!file_exists($filePath)) {
+            // Throw a clear exception when the file is missing or unreadable.
+            throw new RuntimeException("File does not exist: " . $filePath);
+        }
+
+        // Verify that the file is readable.
+        if (!is_readable($filePath)) {
+            // Throw a clear exception when the file is missing or unreadable.
+            throw new RuntimeException("File is not readable: " . $filePath);
+        }
+
+        // Read and return the file contents as a string.
+        $content = @file_get_contents($filePath);
+        if ($content === false) {
+            throw new RuntimeException("Failed to read file contents from path: " . $filePath);
+        }
+
+        return $content;
     }
 
     /**
@@ -42,11 +56,17 @@ class ErrorHandler
      */
     public function safeWriteFile(string $filePath, string $content): int
     {
-        // TODO: Attempt to write the full string content to the target path.
-        // TODO: Return the exact number of bytes written when successful.
-        // TODO: Detect unwritable paths or failed writes.
-        // TODO: Throw a clear exception when the write cannot be completed.
-        throw new BadMethodCallException('Not implemented');
+        // Attempt to write the full string content to the target path.
+        // Detect unwritable paths or failed writes using the error suppression token '@'.
+        $bytesWritten = @file_put_contents($filePath, $content);
+        
+        if ($bytesWritten === false) {
+            // Throw a clear exception when the write cannot be completed.
+            throw new RuntimeException("Failed to write content to file path: " . $filePath);
+        }
+
+        // Return the exact number of bytes written when successful.
+        return $bytesWritten;
     }
 
     /**
@@ -63,9 +83,13 @@ class ErrorHandler
      */
     public function safeDivide(int|float $dividend, int|float $divisor): float
     {
-        // TODO: Check whether the divisor is zero before performing division.
-        // TODO: Throw a clear exception when division by zero is attempted.
-        // TODO: Perform the division and return the result as a float.
-        throw new BadMethodCallException('Not implemented');
+        // Check whether the divisor is zero before performing division.
+        if ($divisor == 0 || $divisor == 0.0) {
+            // Throw a clear exception when division by zero is attempted.
+            throw new RuntimeException("Division by zero error encountered.");
+        }
+
+        // Perform the division and return the result as a float.
+        return (float) ($dividend / $divisor);
     }
 }

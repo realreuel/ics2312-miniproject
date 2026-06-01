@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App;
 
-use BadMethodCallException;
-
 class FileHandler
 {
     /**
@@ -23,12 +21,32 @@ class FileHandler
      */
     public function writeRecord(string $filePath, array $record): bool
     {
-        // TODO: Open the file in write mode ('w') so an existing file is replaced.
-        // TODO: Write the CSV header using the record keys.
-        // TODO: Write the record values in the same column order as the header.
-        // TODO: Close the file handle before returning.
-        // TODO: Implement graceful error handling for invalid paths or write failures.
-        throw new BadMethodCallException('Not implemented');
+        if (empty($record)) {
+            return false;
+        }
+
+        // Open the file in write mode ('w') so an existing file is replaced.
+        $handle = @fopen($filePath, 'w');
+        if (!$handle) {
+            return false;
+        }
+
+        // Write the CSV header using the record keys.
+        $headers = array_keys($record);
+        if (fputcsv($handle, $headers) === false) {
+            fclose($handle);
+            return false;
+        }
+
+        // Write the record values in the same column order as the header.
+        if (fputcsv($handle, array_values($record)) === false) {
+            fclose($handle);
+            return false;
+        }
+
+        // Close the file handle before returning.
+        fclose($handle);
+        return true;
     }
 
     /**
@@ -45,12 +63,34 @@ class FileHandler
      */
     public function readAllRecords(string $filePath): array
     {
-        // TODO: Check whether the target file exists before attempting to open it.
-        // TODO: Read the first row as CSV headers with fgetcsv().
-        // TODO: Read the remaining rows and combine each row with the headers.
-        // TODO: Return an empty array when the file is missing or contains no data.
-        // TODO: Close the file handle in all normal execution paths.
-        throw new BadMethodCallException('Not implemented');
+        // Check whether the target file exists before attempting to open it.
+        if (!file_exists($filePath) || !is_readable($filePath)) {
+            return [];
+        }
+
+        $handle = @fopen($filePath, 'r');
+        if (!$handle) {
+            return [];
+        }
+
+        // Read the first row as CSV headers with fgetcsv().
+        $headers = fgetcsv($handle);
+        if (!$headers) {
+            fclose($handle);
+            return [];
+        }
+
+        $records = [];
+        // Read the remaining rows and combine each row with the headers.
+        while (($row = fgetcsv($handle)) !== false) {
+            if (count($headers) === count($row)) {
+                $records[] = array_combine($headers, $row);
+            }
+        }
+
+        // Close the file handle in all normal execution paths.
+        fclose($handle);
+        return $records;
     }
 
     /**
@@ -67,11 +107,34 @@ class FileHandler
      */
     public function appendRecord(string $filePath, array $record): bool
     {
-        // TODO: Detect whether the file exists and whether it is empty.
-        // TODO: Open the file in append mode ('a') so new records are added at the end.
-        // TODO: Write headers first if the file is new or empty.
-        // TODO: Append the record values in the same order as the header.
-        // TODO: Close the handle and report success or failure clearly.
-        throw new BadMethodCallException('Not implemented');
+        if (empty($record)) {
+            return false;
+        }
+
+        // Detect whether the file exists and whether it is empty.
+        $fileExists = file_exists($filePath);
+        $fileEmpty = $fileExists ? (filesize($filePath) === 0) : true;
+
+        // Open the file in append mode ('a') so new records are added at the end.
+        $handle = @fopen($filePath, 'a');
+        if (!$handle) {
+            return false;
+        }
+
+        // Write headers first if the file is new or empty.
+        if ($fileEmpty) {
+            $headers = array_keys($record);
+            if (fputcsv($handle, $headers) === false) {
+                fclose($handle);
+                return false;
+            }
+        }
+
+        // Append the record values in the same order as the header.
+        $status = fputcsv($handle, array_values($record));
+        
+        // Close the handle and report success or failure clearly.
+        fclose($handle);
+        return $status !== false;
     }
 }

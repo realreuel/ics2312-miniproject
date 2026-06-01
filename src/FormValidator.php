@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App;
 
-use BadMethodCallException;
-
 class FormValidator
 {
     /**
@@ -21,11 +19,21 @@ class FormValidator
      */
     public function validateName(string $name): ?string
     {
-        // TODO: Trim surrounding whitespace before checking length.
-        // TODO: Reject names shorter than 2 characters.
-        // TODO: Reject names that contain digits or unsupported symbols.
-        // TODO: Return null when the name satisfies all rules.
-        throw new BadMethodCallException('Not implemented');
+        // Trim surrounding whitespace before checking length.
+        $trimmedName = trim($name);
+
+        // Reject names shorter than 2 characters.
+        if (strlen($trimmedName) < 2) {
+            return "Name must be at least 2 characters long.";
+        }
+
+        // Reject names that contain digits or unsupported symbols.
+        if (!preg_match("/^[A-Za-z\s'-]+$/", $trimmedName)) {
+            return "Name contains invalid characters.";
+        }
+
+        // Return null when the name satisfies all rules.
+        return null;
     }
 
     /**
@@ -40,11 +48,17 @@ class FormValidator
      */
     public function validateEmail(string $email): ?string
     {
-        // TODO: Trim the email string before validation.
-        // TODO: Use a dependable validation approach such as filter_var().
-        // TODO: Return an error message when the address is malformed.
-        // TODO: Return null for valid email addresses.
-        throw new BadMethodCallException('Not implemented');
+        // Trim the email string before validation.
+        $trimmedEmail = trim($email);
+
+        // Use a dependable validation approach such as filter_var().
+        // Return an error message when the address is malformed.
+        if (!filter_var($trimmedEmail, FILTER_VALIDATE_EMAIL)) {
+            return "The email format is invalid.";
+        }
+
+        // Return null for valid email addresses.
+        return null;
     }
 
     /**
@@ -59,10 +73,18 @@ class FormValidator
      */
     public function validateAge(int $age): ?string
     {
-        // TODO: Check whether the age is below the minimum allowed value of 18.
-        // TODO: Check whether the age is above the maximum allowed value of 100.
-        // TODO: Return null if the age falls within the inclusive valid range.
-        throw new BadMethodCallException('Not implemented');
+        // Check whether the age is below the minimum allowed value of 18.
+        if ($age < 18) {
+            return "Age must be between 18 and 100.";
+        }
+
+        // Check whether the age is above the maximum allowed value of 100.
+        if ($age > 100) {
+            return "Age must be between 18 and 100.";
+        }
+
+        // Return null if the age falls within the inclusive valid range.
+        return null;
     }
 
     /**
@@ -79,10 +101,31 @@ class FormValidator
      */
     public function validateAll(array $input): array
     {
-        // TODO: Extract the required fields from the input array safely.
-        // TODO: Call validateName(), validateEmail(), and validateAge().
-        // TODO: Add only the failing fields to the returned errors array.
-        // TODO: Return an empty array when all validations pass.
-        throw new BadMethodCallException('Not implemented');
+        $errors = [];
+
+        // Extract the required fields from the input array safely.
+        $name = isset($input['name']) ? (string)$input['name'] : '';
+        $email = isset($input['email']) ? (string)$input['email'] : '';
+        $age = isset($input['age']) ? (int)$input['age'] : 0;
+
+        // Call validateName(), validateEmail(), and validateAge().
+        // Add only the failing fields to the returned errors array.
+        $nameError = $this->validateName($name);
+        if ($nameError !== null) {
+            $errors['name'] = $nameError;
+        }
+
+        $emailError = $this->validateEmail($email);
+        if ($emailError !== null) {
+            $errors['email'] = $emailError;
+        }
+
+        $ageError = $this->validateAge($age);
+        if ($ageError !== null) {
+            $errors['age'] = $ageError;
+        }
+
+        // Return an empty array when all validations pass.
+        return $errors;
     }
 }

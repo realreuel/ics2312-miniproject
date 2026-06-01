@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App;
 
-use BadMethodCallException;
-
 class SearchSorter
 {
     /**
@@ -22,11 +20,16 @@ class SearchSorter
      */
     public function linearSearch(array $items, int|string $target): int
     {
-        // TODO: Loop through the array from index 0 to the last element.
-        // TODO: Compare each value to the target using a consistent equality rule.
-        // TODO: Return the matching index immediately when found.
-        // TODO: Return -1 after the loop if the target is not present.
-        throw new BadMethodCallException('Not implemented');
+        // Loop through the array from index 0 to the last element.
+        foreach ($items as $index => $value) {
+            // Compare each value to the target using a consistent equality rule.
+            if ($value == $target) {
+                // Return the matching index immediately when found.
+                return (int) $index;
+            }
+        }
+        // Return -1 after the loop if the target is not present.
+        return -1;
     }
 
     /**
@@ -43,11 +46,27 @@ class SearchSorter
      */
     public function binarySearch(array $items, int|string $target): int
     {
-        // TODO: Track low and high bounds for the current search range.
-        // TODO: Compute the middle index and compare the middle value to the target.
-        // TODO: Narrow the search to the left or right half as appropriate.
-        // TODO: Return the index when the target is found, otherwise return -1.
-        throw new BadMethodCallException('Not implemented');
+        // Track low and high bounds for the current search range.
+        $low = 0;
+        $high = count($items) - 1;
+
+        while ($low <= $high) {
+            // Compute the middle index and compare the middle value to the target.
+            $mid = intdiv($low + $high, 2);
+            
+            if ($items[$mid] == $target) {
+                // Return the index when the target is found
+                return $mid;
+            } elseif ($items[$mid] < $target) {
+                // Narrow the search to the right half
+                $low = $mid + 1;
+            } else {
+                // Narrow the search to the left half
+                $high = $mid - 1;
+            }
+        }
+        // Return -1 if the target is not found.
+        return -1;
     }
 
     /**
@@ -63,11 +82,32 @@ class SearchSorter
      */
     public function bubbleSort(array $items): array
     {
-        // TODO: Compare adjacent items and swap them when they are out of order.
-        // TODO: Repeat passes until the array is fully sorted.
-        // TODO: Count each comparison iteration performed by the algorithm.
-        // TODO: Return both the sorted array and the iteration count.
-        throw new BadMethodCallException('Not implemented');
+        $n = count($items);
+        $iterations = 0;
+        
+        // Repeat passes until the array is fully sorted.
+        for ($i = 0; $i < $n - 1; $i++) {
+            $swapped = false;
+            for ($j = 0; $j < $n - $i - 1; $j++) {
+                // Count each comparison iteration performed by the algorithm.
+                $iterations++;
+                
+                // Compare adjacent items and swap them when they are out of order.
+                if ($items[$j] > $items[$j + 1]) {
+                    $temp = $items[$j];
+                    $items[$j] = $items[$j + 1];
+                    $items[$j + 1] = $temp;
+                    $swapped = true;
+                }
+            }
+            // Optimization check to exit early if no items were swapped in a complete pass.
+            if (!$swapped) {
+                break;
+            }
+        }
+
+        // Return both the sorted array and the iteration count.
+        return ['sorted' => $items, 'iterations' => $iterations];
     }
 
     /**
@@ -83,11 +123,31 @@ class SearchSorter
      */
     public function selectionSort(array $items): array
     {
-        // TODO: For each position, search the unsorted portion for the minimum value.
-        // TODO: Swap the minimum value into the current position when needed.
-        // TODO: Count each comparison iteration.
-        // TODO: Return the sorted array and total iteration count.
-        throw new BadMethodCallException('Not implemented');
+        $n = count($items);
+        $iterations = 0;
+
+        for ($i = 0; $i < $n - 1; $i++) {
+            $minIndex = $i;
+            
+            // For each position, search the unsorted portion for the minimum value.
+            for ($j = $i + 1; $j < $n; $j++) {
+                // Count each comparison iteration.
+                $iterations++;
+                if ($items[$j] < $items[$minIndex]) {
+                    $minIndex = $j;
+                }
+            }
+            
+            // Swap the minimum value into the current position when needed.
+            if ($minIndex !== $i) {
+                $temp = $items[$i];
+                $items[$i] = $items[$minIndex];
+                $items[$minIndex] = $temp;
+            }
+        }
+
+        // Return the sorted array and total iteration count.
+        return ['sorted' => $items, 'iterations' => $iterations];
     }
 
     /**
@@ -103,10 +163,30 @@ class SearchSorter
      */
     public function insertionSort(array $items): array
     {
-        // TODO: Start from the second element and treat earlier elements as the sorted portion.
-        // TODO: Shift larger values to the right until the correct insertion point is found.
-        // TODO: Count each comparison iteration made while searching for the insertion point.
-        // TODO: Return the sorted array and total iteration count.
-        throw new BadMethodCallException('Not implemented');
+        $n = count($items);
+        $iterations = 0;
+
+        // Start from the second element and treat earlier elements as the sorted portion.
+        for ($i = 1; $i < $n; $i++) {
+            $key = $items[$i];
+            $j = $i - 1;
+
+            // Shift larger values to the right until the correct insertion point is found.
+            while ($j >= 0) {
+                // Count each comparison iteration made while searching for the insertion point.
+                $iterations++;
+                
+                if ($items[$j] > $key) {
+                    $items[$j + 1] = $items[$j];
+                    $j--;
+                } else {
+                    break;
+                }
+            }
+            $items[$j + 1] = $key;
+        }
+
+        // Return the sorted array and total iteration count.
+        return ['sorted' => $items, 'iterations' => $iterations];
     }
 }
