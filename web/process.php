@@ -22,11 +22,8 @@ $errors = [];
 $submitted = $_SERVER['REQUEST_METHOD'] === 'POST';
 
 if ($submitted) {
-    // TODO: Replace this placeholder handling with a full validation workflow.
-    // TODO: Call $validator->validateAll($data) and branch on the returned errors.
-    // TODO: Re-render user input safely when validation fails.
-    // TODO: Display a clean confirmation page when validation succeeds.
-    $errors = [];
+    // Validate all submitted data using the FormValidator component
+    $errors = $validator->validateAll($data);
 }
 ?>
 <!DOCTYPE html>
@@ -34,16 +31,45 @@ if ($submitted) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Processing Stub</title>
+    <title>Registration Processing</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+        .error-box { background-color: #ffe6e6; border-left: 5px solid #ff3333; padding: 15px; margin-bottom: 20px; }
+        .success-box { background-color: #e6ffe6; border-left: 5px solid #33cc33; padding: 15px; margin-bottom: 20px; }
+        .error-msg { color: #cc0000; font-weight: bold; }
+        .back-link { display: inline-block; margin-top: 20px; text-decoration: none; color: #0066cc; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
 </head>
 <body>
     <h1>Form Processing</h1>
 
     <?php if (!$submitted): ?>
-        <p>No form data has been submitted yet. Go back to <a href="register.php">register.php</a>.</p>
+        <div class="error-box">
+            <p>No form data has been submitted yet. Go back to <a href="register.php">register.php</a>.</p>
+        </div>
+    <?php elseif (!empty($errors)): ?>
+        <div class="error-box">
+            <h2>Validation Failed</h2>
+            <p>Please review and fix the following errors:</p>
+            <ul>
+                <?php foreach ($errors as $field => $message): ?>
+                    <li><span class="error-msg"><?php echo htmlspecialchars(ucfirst($field), ENT_QUOTES, 'UTF-8'); ?>:</span> <?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+        <p>Go back to <a href="register.php" class="back-link">register.php</a> to correct your details.</p>
     <?php else: ?>
-        <p>This page is a stub. Students should implement validation and confirmation logic here.</p>
-        <pre><?php echo htmlspecialchars(print_r($data, true), ENT_QUOTES, 'UTF-8'); ?></pre>
+        <div class="success-box">
+            <h2>Registration Successful!</h2>
+            <p>Your account details have been securely processed.</p>
+            <h3>Submitted Summary:</h3>
+            <ul>
+                <li><strong>Username:</strong> <?php echo htmlspecialchars($data['username'] ?? '', ENT_QUOTES, 'UTF-8'); ?></li>
+                <li><strong>Email:</strong> <?php echo htmlspecialchars($data['email'] ?? '', ENT_QUOTES, 'UTF-8'); ?></li>
+            </ul>
+        </div>
+        <p>Proceed to the <a href="login.php" class="back-link">Login Page</a>.</p>
     <?php endif; ?>
 </body>
 </html>
